@@ -109,6 +109,9 @@ class SharedMemoryProgressBar(AbstractProgressBar):
     def are_workers_ready(self):
         return (self.progress[1+self.n_workers:] > 0).all()
 
+    def set_total_steps(self, n, worker_id):
+        self.progress[1 + self.n_workers + worker_id] = n
+        
     def progress_bar_thread(self, refresh_seconds=0.5, *args, **kwargs):
         def _progress_bar_thread():
             while not self.stop_event.is_set() and not self.are_workers_ready():
