@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "progressBarDistributed"
+dynamic = ["version"]
+authors = [
+  { name="Ruben Sanchez Garcia", email="ruben.sanchez-garcia@stats.ox.ac.uk" },
+]
+description = "A distributed progress bar"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "tqdm",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/rsanchezgarc/progressBarDistributed"
+"Bug Tracker" = "https://github.com/rsanchezgarc/progressBarDistributed/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "progressBarDistributed.__version__"}

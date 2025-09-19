@@ -1,3 +1,3 @@
-__version__ = "24.08.01"
+__version__ = "25.09.01"
 
 from progressBarDistributed.shmProgressBar import SharedMemoryProgressBar, SharedMemoryProgressBarWorker
