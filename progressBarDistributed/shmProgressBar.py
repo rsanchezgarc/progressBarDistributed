@@ -53,26 +53,32 @@ class SharedMemoryProgressBarWorker(AbstractProgressBarWorker):
         except IOError:
             pass
 
-def _remove_shm_from_resource_tracker(): #TODO: Consider using https://gitlab.com/tenzing/shared-array to avoid the monkey patching.
+def _remove_shm_from_resource_tracker():
     """Monkey-patch multiprocessing.resource_tracker so SharedMemory won't be tracked
 
     More details at: https://bugs.python.org/issue38119
     """
+    # Store the original functions
+    original_register = resource_tracker.register
+    original_unregister = resource_tracker.unregister
 
     def fix_register(name, rtype):
         if rtype == "shared_memory":
             return
-        return resource_tracker._resource_tracker.register(self, name, rtype)
-    resource_tracker.register = fix_register
-
+        return original_register(name, rtype)  # Use original_register instead of self
+    
     def fix_unregister(name, rtype):
         if rtype == "shared_memory":
             return
-        return resource_tracker._resource_tracker.unregister(self, name, rtype)
+        return original_unregister(name, rtype)  # Use original_unregister instead of self
+    
+    # Apply the monkey patch
+    resource_tracker.register = fix_register
     resource_tracker.unregister = fix_unregister
 
     if "shared_memory" in resource_tracker._CLEANUP_FUNCS:
         del resource_tracker._CLEANUP_FUNCS["shared_memory"]
+        
 
 class SharedMemoryProgressBar(AbstractProgressBar):
     def __init__(self, n_workers, shm_name=None):
@@ -103,6 +109,9 @@ class SharedMemoryProgressBar(AbstractProgressBar):
     def are_workers_ready(self):
         return (self.progress[1+self.n_workers:] > 0).all()
 
+    def set_total_steps(self, n, worker_id):
+        self.progress[1 + self.n_workers + worker_id] = n
+        
     def progress_bar_thread(self, refresh_seconds=0.5, *args, **kwargs):
         def _progress_bar_thread():
             while not self.stop_event.is_set() and not self.are_workers_ready():

@@ -53,7 +53,7 @@ if __name__ == "__main__":
 ```
 
 ### Usage subprocess
-Here's a basic example of how to use SharedMemoryProgressBar using multiprocessing
+Here's a basic example of how to use SharedMemoryProgressBar using subprocesses
 
 ```python
 
