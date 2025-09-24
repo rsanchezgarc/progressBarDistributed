@@ -54,28 +54,29 @@ class SharedMemoryProgressBarWorker(AbstractProgressBarWorker):
             pass
 
 def _remove_shm_from_resource_tracker():
-    """Monkey-patch multiprocessing.resource_tracker so SharedMemory won't be tracked
-
-    More details at: https://bugs.python.org/issue38119
+    """Monkey-patch multiprocessing.resource_tracker so SharedMemory won't be tracked.
+    See: https://bugs.python.org/issue38119
     """
-    # Store the original functions
-    original_register = resource_tracker.register
-    original_unregister = resource_tracker.unregister
+
+    # Keep originals so we can delegate for non-shm resources
+    _orig_register = resource_tracker.register
+    _orig_unregister = resource_tracker.unregister
 
     def fix_register(name, rtype):
+        # Skip tracking for shared_memory; delegate otherwise
         if rtype == "shared_memory":
             return
-        return original_register(name, rtype)  # Use original_register instead of self
-    
+        return _orig_register(name, rtype)
+
     def fix_unregister(name, rtype):
         if rtype == "shared_memory":
             return
-        return original_unregister(name, rtype)  # Use original_unregister instead of self
-    
-    # Apply the monkey patch
+        return _orig_unregister(name, rtype)
+
     resource_tracker.register = fix_register
     resource_tracker.unregister = fix_unregister
 
+    # Also prevent cleanup attempts for shared_memory
     if "shared_memory" in resource_tracker._CLEANUP_FUNCS:
         del resource_tracker._CLEANUP_FUNCS["shared_memory"]
         
