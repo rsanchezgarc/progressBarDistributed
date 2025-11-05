@@ -29,3 +29,6 @@ include-package-data = true
 
 [tool.setuptools.dynamic]
 version = {attr = "progressBarDistributed.__version__"}
+
+[project.optional-dependencies]
+test = ["pytest>=7.0", "pytest-timeout>=2.0", "joblib", "numpy"]
